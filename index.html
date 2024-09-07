@@ -145,7 +145,7 @@
         <!-- Form for selecting commodity and date -->
         <form id="priceForm">
             <label for="commodity">Select Commodity:</label>
-            <select id="commodity" name="commodity">
+            <select id="commodity" name="commodity" required>
                 <option value="" disabled selected>Select a commodity</option>
                 {% for commodity in commodities %}
                     <option value="{{ commodity }}">{{ commodity }}</option>
@@ -153,7 +153,7 @@
             </select><br><br>
 
             <label for="date">Select Date:</label>
-            <input type="date" id="date" name="date"><br><br>
+            <input type="date" id="date" name="date" required><br><br>
 
             <button type="submit">Predict Price</button>
         </form>
