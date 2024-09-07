@@ -1,0 +1,8 @@
+Flask==3.0.3
+joblib==1.4.2
+pandas==2.2.2
+scikit-learn==1.5.1
+numpy==2.1.1
+matplotlib==3.9.2
+gunicorn==23.0.0
+Flask-WTF==1.2.1
