@@ -4,15 +4,21 @@ from flask import Flask, render_template, request, jsonify
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 import numpy as np
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 
 # Load CSV file data into memory
-
-commodity_data = pd.read_csv("commodity_prices.csv")
-
-# Ensure 'Date' is parsed as datetime
-commodity_data['Date'] = pd.to_datetime(commodity_data['Date'])
+try:
+    commodity_data = pd.read_csv("commodity_prices.csv")
+    commodity_data['Date'] = pd.to_datetime(commodity_data['Date'])
+    logging.info("CSV file loaded successfully")
+except Exception as e:
+    logging.error(f"Error loading CSV file: {e}")
+    commodity_data = None  # Set as None to prevent further errors
 
 # List of commodities from the dataset
 commodities = [
@@ -28,22 +34,26 @@ commodity_models = {}
 # Train models for each commodity based on historical data
 def train_models():
     global commodity_models
+    if commodity_data is None:
+        logging.error("No data to train models.")
+        return
+
     for commodity in commodities:
-        # Prepare the dataset for the commodity
-        df = commodity_data[['Date', commodity]].dropna()
-        df['Date'] = pd.to_datetime(df['Date']).map(pd.Timestamp.toordinal)
-        
-        # Split data into features and target
-        X = df[['Date']]
-        y = df[commodity]
+        if commodity in commodity_data.columns:
+            df = commodity_data[['Date', commodity]].dropna()
+            df['Date'] = pd.to_datetime(df['Date']).map(pd.Timestamp.toordinal)
 
-        # Split into training and test sets
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+            X = df[['Date']]
+            y = df[commodity]
 
-        # Train the model (using linear regression for simplicity)
-        model = LinearRegression()
-        model.fit(X_train, y_train)
-        commodity_models[commodity] = model
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+            model = LinearRegression()
+            model.fit(X_train, y_train)
+            commodity_models[commodity] = model
+            logging.info(f"Model trained for {commodity}")
+        else:
+            logging.warning(f"Commodity data for {commodity} not found in dataset.")
 
 # Function to predict price if exact date is not available
 def predict_price(commodity, date):
@@ -60,25 +70,23 @@ def index():
 
 @app.route('/predict', methods=['POST'])
 def predict():
+    if commodity_data is None:
+        return jsonify({"error": "Commodity data not available."}), 500
+
     data = request.get_json()
-    selected_commodity = data['commodity']
-    selected_date = data['date']
+    selected_commodity = data.get('commodity')
+    selected_date = data.get('date')
 
     try:
-        # Convert user input date to datetime
         selected_date = pd.to_datetime(selected_date)
-
-        # Filter the dataset based on selected date
         filtered_data = commodity_data[commodity_data['Date'] == selected_date]
 
         if not filtered_data.empty:
-            # Get the price of the selected commodity
             price = filtered_data[selected_commodity].values[0]
             if pd.isna(price):
                 return jsonify({"error": f"Price for {selected_commodity} not available on {selected_date.strftime('%Y-%m-%d')}."})
             return jsonify({"price": price})
         else:
-            # If no data is available for the selected date, use the trained model to predict
             predicted_price = predict_price(selected_commodity, selected_date)
             if predicted_price:
                 return jsonify({"price": predicted_price})
@@ -86,9 +94,9 @@ def predict():
                 return jsonify({"error": f"Prediction model for {selected_commodity} is not available."})
         
     except Exception as e:
-        return jsonify({"error": str(e)})
+        logging.error(f"Error during prediction: {e}")
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    # Train the models on startup
     train_models()
-    app.run(debug=True)
+    app.run(debug=False, host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
