@@ -56,7 +56,9 @@ def predict_price(commodity, date):
 
 @app.route('/')
 def index():
+    print(commodities)  # Debug log to check if commodities list is populated
     return render_template('index.html', commodities=commodities)
+
 
 @app.route('/predict', methods=['POST'])
 def predict():
