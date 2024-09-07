@@ -36,15 +36,6 @@
             margin-bottom: 20px;
         }
 
-        p.instructions {
-            font-size: 1.2em;
-            margin: 20px;
-            background-color: rgba(0, 0, 0, 0.4);
-            padding: 15px;
-            border-radius: 10px;
-            display: inline-block;
-        }
-
         select, input[type="date"] {
             padding: 10px;
             font-size: 1.1em;
@@ -58,11 +49,6 @@
             color: white;
             background-color: #333;
             cursor: pointer;
-            transition: all 0.3s ease-in-out;
-        }
-
-        button:hover {
-            box-shadow: 0px 0px 15px 7px rgba(255, 255, 255, 0.8);
         }
 
         #priceResult {
@@ -78,74 +64,16 @@
             position: relative;
             bottom: 0;
             width: 100%;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Add 3D animation in the background */
-        .moving-animation {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        .circle {
-            position: absolute;
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.2);
-            animation: moveCircle 20s infinite ease-in-out;
-        }
-
-        .circle:nth-child(2) {
-            width: 300px;
-            height: 300px;
-            animation-duration: 25s;
-            left: 40%;
-        }
-
-        .circle:nth-child(3) {
-            width: 250px;
-            height: 250px;
-            animation-duration: 22s;
-            right: 30%;
-            bottom: 20%;
-        }
-
-        @keyframes moveCircle {
-            0% { transform: translate(0, 0); }
-            50% { transform: translate(30vw, -20vh); }
-            100% { transform: translate(0, 0); }
         }
     </style>
 </head>
 <body>
 
-    <div class="moving-animation">
-        <div class="circle"></div>
-        <div class="circle"></div>
-        <div class="circle"></div>
-    </div>
-
-    <!-- Instructions section -->
     <div class="container">
         <h1>Commodity Price Predictor</h1>
-        <p class="instructions">
-            <strong>Instructions:</strong><br>
-            1. Select a commodity from the dropdown list.<br>
-            2. Choose a date (past, present, or future).<br>
-            3. Click on "Predict Price" to see the estimated commodity price.<br>
-            If no data is available for the selected date, the app will predict the price based on historical data.
-        </p>
-
-        <!-- Form for selecting commodity and date -->
         <form id="priceForm">
             <label for="commodity">Select Commodity:</label>
-            <select id="commodity" name="commodity" required>
+            <select id="commodity" name="commodity">
                 <option value="" disabled selected>Select a commodity</option>
                 {% for commodity in commodities %}
                     <option value="{{ commodity }}">{{ commodity }}</option>
@@ -153,7 +81,7 @@
             </select><br><br>
 
             <label for="date">Select Date:</label>
-            <input type="date" id="date" name="date" required><br><br>
+            <input type="date" id="date" name="date"><br><br>
 
             <button type="submit">Predict Price</button>
         </form>
@@ -161,7 +89,6 @@
         <h2 id="priceResult"></h2>
     </div>
 
-    <!-- Footer section -->
     <div class="footer">
         Developed by SHASHWAT MISHRA
     </div>
